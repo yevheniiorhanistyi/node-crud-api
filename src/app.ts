@@ -1,33 +1,15 @@
-import Fastify from "fastify";
+import cluster from "node:cluster";
 import dotenv from "dotenv";
 
-import { routes as productRoutes } from "./routes/product.routes.js";
-import { errorHandler } from "./errors/errorHandler.js";
-import { notFoundHandler } from "./errors/notFoundHandler.js";
+import { startPrimary } from "./cluster/primary.js";
+import { startWorker } from "./cluster/worker.js";
 
 dotenv.config();
 
-const app = Fastify({
-  logger: true,
-});
+const isMultiMode = process.env.MULTI_MODE === "true";
 
-app.setNotFoundHandler(notFoundHandler);
-app.setErrorHandler(errorHandler);
-app.register(productRoutes, {
-  prefix: "/api/products",
-});
-
-const PORT = Number(process.env.PORT) || 4000;
-
-const start = async () => {
-  try {
-    await app.listen({
-      port: PORT,
-    });
-  } catch (err) {
-    app.log.error(err);
-    process.exit(1);
-  }
-};
-
-start();
+if (isMultiMode && cluster.isPrimary) {
+  startPrimary();
+} else {
+  startWorker();
+}
