@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { randomUUID } from "node:crypto";
-import { Product, ProductInput, ProductId } from "../schemas/product.schema.js";
-import { products } from "../db/memory.db.js";
+import { ProductInput, ProductId } from "../schemas/product.schema.js";
+import { productService } from "../services/product.service.js";
 
 export const getAllProducts = async (request: FastifyRequest, reply: FastifyReply) => {
+  const products = await productService.getAll();
   reply.send(products);
 };
 
@@ -13,15 +13,14 @@ export const getProductById = async (
   }>,
   reply: FastifyReply
 ) => {
-  const { id } = request.params;
-  const product = products.find((p) => p.id === id);
+  const product = await productService.getOne(request.params.id);
   if (!product) {
     return reply.status(404).send({
       error: "Product not found",
     });
-  } else {
-    reply.send(product);
   }
+
+  reply.send(product);
 };
 
 export const createProduct = async (
@@ -30,11 +29,7 @@ export const createProduct = async (
   }>,
   reply: FastifyReply
 ) => {
-  const newProduct: Product = {
-    id: randomUUID(),
-    ...request.body,
-  };
-  products.push(newProduct);
+  const newProduct = await productService.create(request.body);
   return reply.status(201).send(newProduct);
 };
 
@@ -45,21 +40,14 @@ export const updateProduct = async (
   }>,
   reply: FastifyReply
 ) => {
-  const { id } = request.params;
-  const index = products.findIndex((p) => p.id === id);
+  const updated = await productService.update(request.params.id, request.body);
 
-  if (index === -1) {
+  if (!updated) {
     return reply.status(404).send({
       error: "Product not found",
     });
-  } else {
-    const updatedProduct = {
-      ...request.body,
-      id,
-    };
-    products[index] = updatedProduct;
-    reply.send(updatedProduct);
   }
+  reply.send(updated);
 };
 
 export const deleteProduct = async (
@@ -68,15 +56,11 @@ export const deleteProduct = async (
   }>,
   reply: FastifyReply
 ) => {
-  const { id } = request.params;
-  const index = products.findIndex((p) => p.id === id);
-
-  if (index === -1) {
+  const deleted = await productService.delete(request.params.id);
+  if (!deleted) {
     return reply.status(404).send({
       error: "Product not found",
     });
-  } else {
-    products.splice(index, 1);
-    reply.status(204).send();
   }
+  reply.status(204).send();
 };
