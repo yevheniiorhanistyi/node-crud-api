@@ -7,9 +7,7 @@ import { notFoundHandler } from "../errors/notFoundHandler.js";
 export const startWorker = async () => {
   const PORT = Number(process.env.PORT) || 4000;
 
-  const app = Fastify({
-    logger: true,
-  });
+  const app = Fastify();
 
   app.setNotFoundHandler(notFoundHandler);
   app.setErrorHandler(errorHandler);
@@ -23,7 +21,9 @@ export const startWorker = async () => {
     });
     console.log(`Worker is running on port ${PORT}`);
   } catch (err) {
-    app.log.error(err);
+    console.error(err);
     process.exit(1);
   }
+
+  return app;
 };
