@@ -9,6 +9,7 @@
     "start:multi": "cross-env MULTI_MODE=true tsx watch src/app.ts",
     "start:multi:prod": "cross-env MULTI_MODE=true npm run build && node dist/app.js",
     "build": "tsc",
+    "test": "node --import tsx --test tests/**/*.test.ts",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.ts\""
