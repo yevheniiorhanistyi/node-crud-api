@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start:dev": "tsx watch src/app.ts",
-    "build": "tsc",
     "start:prod": "npm run build && node dist/app.js",
+    "start:multi": "cross-env MULTI_MODE=true tsx watch src/app.ts",
+    "start:multi:prod": "cross-env MULTI_MODE=true npm run build && node dist/app.js",
+    "build": "tsc",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.ts\""
@@ -23,6 +25,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.5.0",
+    "cross-env": "^10.1.0",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.4.0",
